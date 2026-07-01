@@ -128,7 +128,7 @@ export const useBotAI = ({ setCurrentAnimation }: UseBotAIProps) => {
         await new Promise((resolve) => setTimeout(resolve, delay));
 
         const currentBoard = boardRef.current;
-        if (!currentBoard || activePlayer === "beagle" || gameOver) {
+        if (!currentBoard || useGameStore.getState().activePlayer === "beagle" || gameOver) {
           isProcessingRef.current = false;
           return;
         }

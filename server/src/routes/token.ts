@@ -1,11 +1,15 @@
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
 
 export async function exchangeCodeForToken(code: string): Promise<{ access_token: string }> {
-  if (!code.trim()) throw new Error("Missing OAuth code");
+  if (!code.trim()) {
+    throw new Error("Missing OAuth code");
+  }
 
   const clientId = Bun.env.DISCORD_CLIENT_ID;
   const clientSecret = Bun.env.DISCORD_CLIENT_SECRET;
-  if (!clientId || !clientSecret) throw new Error("Missing Discord OAuth credentials");
+  if (!clientId || !clientSecret) {
+    throw new Error("Missing Discord OAuth credentials");
+  }
 
   const body = new URLSearchParams({
     client_id: clientId,

@@ -1,3 +1,4 @@
+import type { ServerWebSocket } from "bun";
 import { Hono } from "hono";
 import { exchangeCodeForToken } from "./routes/token";
 import { CheckersRoom } from "./rooms/checkersRoom";
