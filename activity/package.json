@@ -16,6 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@discord/embedded-app-sdk": "^2.5.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",
     "@tailwindcss/vite": "^4.2.2",
