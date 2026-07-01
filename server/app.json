@@ -1,0 +1,21 @@
+{
+  "name": "Discord Checkers Server",
+  "description": "OAuth token exchange and WebSocket sync for Beagle vs Corgi Discord Activity",
+  "repository": "https://github.com/kotru21/discordCheckersBot",
+  "keywords": ["discord", "checkers", "bun", "websocket"],
+  "stack": "container",
+  "env": {
+    "DISCORD_CLIENT_ID": {
+      "description": "Discord application Client ID",
+      "required": true
+    },
+    "DISCORD_CLIENT_SECRET": {
+      "description": "Discord application Client Secret",
+      "required": true
+    },
+    "SERVER_PUBLIC_HOST": {
+      "description": "Public hostname without protocol, e.g. your-app.herokuapp.com",
+      "required": false
+    }
+  }
+}

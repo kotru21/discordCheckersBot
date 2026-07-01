@@ -109,13 +109,65 @@ Deploy the `activity/` package as a static Vite site.
 - **Output directory:** `dist`
 - **Environment variables:**
   - `VITE_DISCORD_CLIENT_ID` — Discord application client ID
-  - `VITE_API_HOST` — public host of the game server **without** `https://` (e.g. `discord-checkers-server.fly.dev`)
+  - `VITE_API_HOST` — public host of the game server **without** `https://` (e.g. `discord-checkers-server.herokuapp.com`)
 
 Set the **Activity URL** in the Developer Portal to your Vercel production URL.
 
+### Server → Heroku (recommended for you)
+
+Deploy `server/` as a **Docker** web dyno (Bun + WebSocket).
+
+1. Install [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) and log in:
+
+   ```bash
+   heroku login
+   ```
+
+2. Create the app (from repo root):
+
+   ```bash
+   heroku create discord-checkers-server
+   heroku stack:set container -a discord-checkers-server
+   ```
+
+3. Set secrets:
+
+   ```bash
+   heroku config:set DISCORD_CLIENT_ID=your_client_id -a discord-checkers-server
+   heroku config:set DISCORD_CLIENT_SECRET=your_client_secret -a discord-checkers-server
+   heroku config:set SERVER_PUBLIC_HOST=discord-checkers-server.herokuapp.com -a discord-checkers-server
+   ```
+
+4. Deploy (uses root `heroku.yml` → `server/Dockerfile`):
+
+   ```bash
+   git push heroku main
+   ```
+
+5. Verify:
+
+   ```bash
+   curl https://discord-checkers-server.herokuapp.com/api/health
+   ```
+
+   Expected: `{"ok":true}`
+
+6. On **Vercel**, set:
+
+   ```
+   VITE_API_HOST=discord-checkers-server.herokuapp.com
+   ```
+
+   Redeploy activity. Heroku sets `PORT` automatically — do not hardcode it.
+
+**Notes:**
+- WebSocket works on standard Heroku web dynos (`/api/ws`).
+- Game rooms are in-memory; dyno restart clears active games.
+- Free/Eco dyno sleeps when idle — first request may be slow.
+
 ### Server → Fly.io / Railway
 
-Deploy `server/` as a long-running Bun process with **WebSocket** support on port **3001**.
+Deploy `server/` as a long-running Bun process with **WebSocket** support.
 
 - Use `server/Dockerfile` and `server/fly.toml` as a starting point for Fly.io.
 - Set environment variables:

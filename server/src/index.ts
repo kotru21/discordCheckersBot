@@ -55,9 +55,10 @@ interface MoveMessage {
 
 type ClientMessage = JoinMessage | MoveMessage;
 
-const port = Number(Bun.env.SERVER_PORT ?? 3001);
+const port = Number(Bun.env.PORT ?? Bun.env.SERVER_PORT ?? 3001);
 
 Bun.serve<WsData>({
+  hostname: "0.0.0.0",
   port,
   fetch(req, server) {
     const url = new URL(req.url);

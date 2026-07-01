@@ -14,15 +14,25 @@ export type RoomStateMessage = {
   payload: RoomStatePayload;
 };
 
+function buildWebSocketUrl(instanceId: string): string {
+  const query = `instanceId=${encodeURIComponent(instanceId)}`;
+  const inDiscord = new URLSearchParams(window.location.search).has("frame_id");
+
+  // Inside Discord iframe, use relative URL so patchUrlMappings proxies to the API host
+  if (inDiscord) {
+    return `/api/ws?${query}`;
+  }
+
+  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+  const host = import.meta.env.VITE_API_HOST ?? "localhost:3001";
+  return `${protocol}://${host}/api/ws?${query}`;
+}
+
 export function connectGameSocket(
   instanceId: string,
   onState: (msg: RoomStateMessage) => void
 ): WebSocket {
-  const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-  const host = import.meta.env.VITE_API_HOST ?? "localhost:3001";
-  const socket = new WebSocket(
-    `${protocol}://${host}/api/ws?instanceId=${instanceId}`
-  );
+  const socket = new WebSocket(buildWebSocketUrl(instanceId));
 
   socket.addEventListener("message", (event) => {
     const data = JSON.parse(String(event.data)) as RoomStateMessage;
