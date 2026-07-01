@@ -7,7 +7,7 @@ import {
   type SetStateAction,
 } from "react";
 import type { PieceAnimationInfo } from "@shared/types/pieceAnimation.types";
-import type { Board, GameMode, Move, Player, Position } from "@shared/types/game.types";
+import type { Board, GameMode, Move, PieceType, Player, Position } from "@shared/types/game.types";
 import { PLAYER, PERFORMANCE_MODES } from "@shared/config/constants";
 import { useGame } from "../store/gameStore";
 import { restartMatchFromUI } from "../store/matchSessionActions";
@@ -32,6 +32,12 @@ type PerformanceMode =
 
 export interface UseGameBoardControllerArgs {
   onReturnToMenu: () => void;
+  sendMove?: (
+    fromRow: number,
+    fromCol: number,
+    toRow: number,
+    toCol: number
+  ) => void;
 }
 
 export interface UseGameBoardControllerResult {
@@ -65,8 +71,30 @@ function canLocalPlayerMove(
   return activePlayer === "beagle";
 }
 
+function isLocalPiece(
+  piece: PieceType,
+  playMode: "solo_bot" | "discord_pvp",
+  myPlayer: Player | null
+): boolean {
+  if (playMode === "discord_pvp" && myPlayer === "corgi") {
+    return pieceUtils.isBotPiece(piece);
+  }
+  return pieceUtils.isPlayerPiece(piece);
+}
+
+function capturesForLocalPlayer(
+  playMode: "solo_bot" | "discord_pvp",
+  myPlayer: Player | null
+): boolean {
+  if (playMode === "discord_pvp" && myPlayer === "corgi") {
+    return false;
+  }
+  return true;
+}
+
 export function useGameBoardController({
   onReturnToMenu,
+  sendMove,
 }: UseGameBoardControllerArgs): UseGameBoardControllerResult {
   const {
     board,
@@ -112,7 +140,11 @@ export function useGameBoardController({
       if (!localPlayerCanMove || !board) {
         return [] as PieceCaptureHighlight[];
       }
-      return getPiecesWithCaptures(board, true, gameMode);
+      return getPiecesWithCaptures(
+        board,
+        capturesForLocalPlayer(playMode, myPlayer),
+        gameMode
+      );
     } catch (error) {
       logger.error(
         "Ошибка при получении фигур с захватами:",
@@ -120,7 +152,7 @@ export function useGameBoardController({
       );
       return [] as PieceCaptureHighlight[];
     }
-  }, [board, localPlayerCanMove, gameMode]);
+  }, [board, localPlayerCanMove, gameMode, playMode, myPlayer]);
 
   const handlePerformanceData = useCallback(
     (fps: number, mode: PerformanceMode) => {
@@ -202,7 +234,7 @@ export function useGameBoardController({
 
       try {
         const piece = board[row][col];
-        const isPlayerPiece = pieceUtils.isPlayerPiece(piece);
+        const isOwnPiece = isLocalPiece(piece, playMode, myPlayer);
 
         if (selectedPiece) {
           const selectedMove = validMoves.find(
@@ -210,9 +242,16 @@ export function useGameBoardController({
           );
 
           if (selectedMove) {
-            const wasCapture = selectedMove.capturedRow !== undefined;
             const fromRow = selectedPiece.row;
             const fromCol = selectedPiece.col;
+
+            if (playMode === "discord_pvp" && sendMove) {
+              sendMove(fromRow, fromCol, row, col);
+              resetSelection();
+              return;
+            }
+
+            const wasCapture = selectedMove.capturedRow !== undefined;
 
             const animationId = startAnimation(
               fromRow,
@@ -262,12 +301,12 @@ export function useGameBoardController({
               toCol: col,
               animationId,
             });
-          } else if (isPlayerPiece) {
+          } else if (isOwnPiece) {
             selectPiece(row, col);
           } else {
             resetSelection();
           }
-        } else if (isPlayerPiece) {
+        } else if (isOwnPiece) {
           selectPiece(row, col);
         }
       } catch (error) {
@@ -296,6 +335,7 @@ export function useGameBoardController({
       setSelectedPiece,
       setValidMoves,
       startAnimation,
+      sendMove,
       gameMode,
     ]
   );

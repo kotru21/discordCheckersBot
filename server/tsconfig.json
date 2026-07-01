@@ -7,7 +7,10 @@
     "noUncheckedIndexedAccess": true,
     "skipLibCheck": true,
     "types": ["bun-types"],
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@shared/*": ["../activity/src/shared/*"]
+    }
   },
   "include": ["src/**/*"]
 }

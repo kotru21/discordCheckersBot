@@ -5,13 +5,17 @@ import { ModeSelector } from "./ModeSelector";
 import { GameBoardHud } from "./GameBoardHud";
 import { GameOverSheet } from "./GameOverSheet";
 import { useGameBoardController } from "../hooks/useGameBoardController";
+import { useDiscordSessionContext } from "../discord/ActivityShell";
+import { useMultiplayerSync } from "../multiplayer/useMultiplayerSync";
 
 interface GameBoardProps {
   onReturnToMenu: () => void;
 }
 
 export function GameBoard({ onReturnToMenu }: GameBoardProps) {
-  const ctrl = useGameBoardController({ onReturnToMenu });
+  const session = useDiscordSessionContext();
+  const { sendMove } = useMultiplayerSync(session);
+  const ctrl = useGameBoardController({ onReturnToMenu, sendMove });
   const [showRules, setShowRules] = useState(false);
   const [modeSelectorOpen, setModeSelectorOpen] = useState(false);
 
