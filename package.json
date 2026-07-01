@@ -15,5 +15,16 @@
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
     "typecheck": "bun run --cwd activity typecheck && bun run --cwd server typecheck",
     "check": "bun run lint && bun run typecheck && bun run test"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.6.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.3",
+    "globals": "^17.7.0",
+    "jiti": "^2.7.0",
+    "prettier": "^3.9.4",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.62.1"
   }
 }
