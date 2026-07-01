@@ -4,11 +4,14 @@
   "devCommand": "bun run --cwd activity dev",
   "installCommand": "bun install",
   "outputDirectory": "activity/dist",
-  "framework": "vite",
   "rewrites": [
     {
       "source": "/api/:path*",
       "destination": "https://discord-checkers-server-2dbcedabcdf8.herokuapp.com/api/:path*"
+    },
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
     }
   ]
 }

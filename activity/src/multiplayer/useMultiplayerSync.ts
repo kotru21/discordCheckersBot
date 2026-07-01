@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { DiscordSession } from "../discord/bootstrap";
+import { resolvePlayerSideFromRoom } from "../discord/assignSides";
 import { useGameStore } from "../store/gameStore";
 import { connectGameSocket } from "./gameSocket";
 import type { Player } from "@shared/types/game.types";
@@ -20,16 +21,19 @@ function buildGameMessage(
     return "Game over";
   }
   if (myPlayer && activePlayer === myPlayer) {
-    return "Your turn";
+    return `Your turn (${myPlayer})`;
   }
-  return "Opponent's turn…";
+  if (myPlayer) {
+    return `Opponent's turn… (you are ${myPlayer})`;
+  }
+  return "Connecting to game…";
 }
 
 export function useMultiplayerSync(session: DiscordSession | null) {
   const playMode = useGameStore((s) => s.playMode);
-  const myPlayer = useGameStore((s) => s.myPlayer);
   const setBoard = useGameStore((s) => s.setBoard);
   const setActivePlayer = useGameStore((s) => s.setActivePlayer);
+  const setMyPlayer = useGameStore((s) => s.setMyPlayer);
   const setGameOver = useGameStore((s) => s.setGameOver);
   const setGameMessage = useGameStore((s) => s.setGameMessage);
   const setSelectedPiece = useGameStore((s) => s.setSelectedPiece);
@@ -42,21 +46,32 @@ export function useMultiplayerSync(session: DiscordSession | null) {
       return;
     }
 
-    const socket = connectGameSocket(session.instanceId, ({ payload }) => {
-      setBoard(payload.board);
-      setActivePlayer(payload.activePlayer);
-      setGameOver(payload.gameOver);
-      setGameMessage(
-        buildGameMessage(
-          payload.activePlayer,
-          myPlayer,
-          payload.gameOver,
-          payload.winner
-        )
-      );
-      setSelectedPiece(null);
-      setValidMoves([]);
-    });
+    const socket = connectGameSocket(
+      session.instanceId,
+      ({ payload }) => {
+        const myPlayer = resolvePlayerSideFromRoom(
+          payload.players,
+          session.userId
+        );
+        setMyPlayer(myPlayer);
+        setBoard(payload.board);
+        setActivePlayer(payload.activePlayer);
+        setGameOver(payload.gameOver);
+        setGameMessage(
+          buildGameMessage(
+            payload.activePlayer,
+            myPlayer,
+            payload.gameOver,
+            payload.winner
+          )
+        );
+        setSelectedPiece(null);
+        setValidMoves([]);
+      },
+      (message) => {
+        setGameMessage(message);
+      }
+    );
 
     socketRef.current = socket;
 
@@ -79,9 +94,9 @@ export function useMultiplayerSync(session: DiscordSession | null) {
   }, [
     playMode,
     session,
-    myPlayer,
     setBoard,
     setActivePlayer,
+    setMyPlayer,
     setGameOver,
     setGameMessage,
     setSelectedPiece,

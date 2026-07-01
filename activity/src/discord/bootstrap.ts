@@ -10,10 +10,12 @@ const clientId =
 const PRODUCTION_API_HOST = "discord-checkers-server-2dbcedabcdf8.herokuapp.com";
 
 function resolveApiHost(): string {
-  if (import.meta.env.VITE_API_HOST) {
-    return import.meta.env.VITE_API_HOST;
-  }
-  return import.meta.env.PROD ? PRODUCTION_API_HOST : "localhost:3001";
+  const raw = import.meta.env.VITE_API_HOST ?? (import.meta.env.PROD ? PRODUCTION_API_HOST : "localhost:3001");
+  return raw.replace(/^https?:\/\//, "").replace(/\/$/, "");
+}
+
+function buildApiUrl(path: string): string {
+  return `https://${resolveApiHost()}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 async function readApiJson<T>(response: Response): Promise<T> {
@@ -47,7 +49,7 @@ export async function bootstrapDiscordSession(): Promise<DiscordSession> {
   await discordSdk.ready();
 
   const apiHost = resolveApiHost();
-  patchUrlMappings([{ prefix: "/api", target: apiHost }], {
+  patchUrlMappings([{ prefix: "/api", target: `${apiHost}/api` }], {
     patchFetch: true,
     patchWebSocket: true,
     patchXhr: true,
@@ -61,7 +63,7 @@ export async function bootstrapDiscordSession(): Promise<DiscordSession> {
     scope: ["identify", "guilds", "rpc.activities.write"],
   });
 
-  const { access_token } = await fetch("/api/token", {
+  const { access_token } = await fetch(buildApiUrl("/api/token"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code }),

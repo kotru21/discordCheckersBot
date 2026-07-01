@@ -76,8 +76,14 @@ function isLocalPiece(
   playMode: "solo_bot" | "discord_pvp",
   myPlayer: Player | null
 ): boolean {
-  if (playMode === "discord_pvp" && myPlayer === "corgi") {
-    return pieceUtils.isBotPiece(piece);
+  if (playMode === "discord_pvp") {
+    if (myPlayer === "beagle") {
+      return pieceUtils.isPlayerPiece(piece);
+    }
+    if (myPlayer === "corgi") {
+      return pieceUtils.isBotPiece(piece);
+    }
+    return false;
   }
   return pieceUtils.isPlayerPiece(piece);
 }
@@ -86,8 +92,8 @@ function capturesForLocalPlayer(
   playMode: "solo_bot" | "discord_pvp",
   myPlayer: Player | null
 ): boolean {
-  if (playMode === "discord_pvp" && myPlayer === "corgi") {
-    return false;
+  if (playMode === "discord_pvp") {
+    return myPlayer === "beagle";
   }
   return true;
 }

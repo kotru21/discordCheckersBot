@@ -6,11 +6,11 @@ Based on the standalone game [CorgiBigleCheckers](https://github.com/kotru21/Cor
 
 ## Monorepo structure
 
-| Package    | Path        | Role |
-| ---------- | ----------- | ---- |
-| `activity` | `activity/` | Vite + React 3D client (Discord iframe) |
-| `server`   | `server/`   | Bun + Hono API, OAuth token exchange, WebSocket game rooms |
-| `bot`      | `bot/`      | Optional Discord bot — `/checkers` slash command to launch the Activity |
+| Package    | Path        | Role                                                                       |
+| ---------- | ----------- | -------------------------------------------------------------------------- |
+| `activity` | `activity/` | Vite + React 3D client (Discord iframe)                                    |
+| `server`   | `server/`   | Bun + Hono API, OAuth token exchange, WebSocket game rooms                 |
+| `bot`      | `bot/`      | Optional Discord bot — `/checkers` slash command to launch the Activity  |
 
 ## Prerequisites
 
@@ -104,14 +104,32 @@ Run from the repo root:
 
 Deploy the `activity/` package as a static Vite site.
 
+- **Project:** `discord-checkers-bot-activity` (not the repo-root `discord-checkers-bot` project unless you intentionally use that URL)
 - **Root directory:** `activity`
 - **Build command:** `bun run build` (see `activity/vercel.json`)
 - **Output directory:** `dist`
+- **Install command:** `cd .. && bun install` (monorepo workspace)
+- **API proxy:** `activity/vercel.json` rewrites `/api/*` to Heroku — do **not** add `middleware.ts` or `activity/api/` on this project (breaks Bun workspace deploy with `npm install` error)
 - **Environment variables:**
   - `VITE_DISCORD_CLIENT_ID` — Discord application client ID
   - `VITE_API_HOST` — public host of the game server **without** `https://` (e.g. `discord-checkers-server.herokuapp.com`)
 
 Set the **Activity URL** in the Developer Portal to your Vercel production URL.
+
+In **Developer Portal → your app → Activities → URL Mappings**, add:
+
+| Prefix | Target                                                   |
+| ------ | -------------------------------------------------------- |
+| `/api` | `discord-checkers-server-2dbcedabcdf8.herokuapp.com`     |
+
+Also add **OAuth2 redirect**: `https://127.0.0.1` (required for Discord Activity token exchange).
+
+On **Vercel**, set:
+
+```env
+VITE_DISCORD_CLIENT_ID=848160407424073768
+VITE_API_HOST=discord-checkers-server-2dbcedabcdf8.herokuapp.com
+```
 
 ### Server → Heroku (recommended for you)
 
@@ -154,13 +172,14 @@ Deploy `server/` as a **Docker** web dyno (Bun + WebSocket).
 
 6. On **Vercel**, set:
 
-   ```
+   ```env
    VITE_API_HOST=discord-checkers-server.herokuapp.com
    ```
 
    Redeploy activity. Heroku sets `PORT` automatically — do not hardcode it.
 
 **Notes:**
+
 - WebSocket works on standard Heroku web dynos (`/api/ws`).
 - Game rooms are in-memory; dyno restart clears active games.
 - Free/Eco dyno sleeps when idle — first request may be slow.
