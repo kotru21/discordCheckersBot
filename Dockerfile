@@ -6,6 +6,7 @@ WORKDIR /app
 COPY package.json bun.lock ./
 COPY server/package.json ./server/
 COPY activity/package.json ./activity/
+COPY bot/package.json ./bot/
 RUN bun install --frozen-lockfile
 
 COPY server ./server
