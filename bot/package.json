@@ -1,1 +1,17 @@
-{"name":"@discord-checkers/bot","private":true,"version":"0.0.0","type":"module","scripts":{"dev":"echo bot not ready"}}
+{
+  "name": "@discord-checkers/bot",
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "register-commands": "bun src/registerCommands.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "discord.js": "^14.26.0"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  }
+}
