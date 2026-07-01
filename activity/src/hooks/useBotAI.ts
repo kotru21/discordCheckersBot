@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { useGame } from "../store/gameStore";
+import { useGame, useGameStore } from "../store/gameStore";
 import { useAnimationStore } from "../features/animation";
 import { getBestMove } from "../services/AIservice";
 import {
@@ -21,8 +21,8 @@ export const useBotAI = ({ setCurrentAnimation }: UseBotAIProps) => {
   const {
     board,
     setBoard,
-    playerTurn,
-    setPlayerTurn,
+    activePlayer,
+    setActivePlayer,
     gameOver,
     setGameOver,
     setGameMessage,
@@ -89,15 +89,20 @@ export const useBotAI = ({ setCurrentAnimation }: UseBotAIProps) => {
 
   useEffect(() => {
     // Сбрасываем флаг когда ход переходит к игроку
-    if (playerTurn) {
+    if (activePlayer === "beagle") {
       hasMovedRef.current = false;
     }
-  }, [playerTurn]);
+  }, [activePlayer]);
 
   useEffect(() => {
+    const playMode = useGameStore.getState().playMode;
+    if (playMode === "discord_pvp") {
+      return;
+    }
+
     // Не запускаем если: ход игрока, игра окончена, уже обрабатываем, уже сделали ход, или идёт анимация
     if (
-      playerTurn ||
+      activePlayer === "beagle" ||
       gameOver ||
       isProcessingRef.current ||
       hasMovedRef.current ||
@@ -123,7 +128,7 @@ export const useBotAI = ({ setCurrentAnimation }: UseBotAIProps) => {
         await new Promise((resolve) => setTimeout(resolve, delay));
 
         const currentBoard = boardRef.current;
-        if (!currentBoard || playerTurn || gameOver) {
+        if (!currentBoard || activePlayer === "beagle" || gameOver) {
           isProcessingRef.current = false;
           return;
         }
@@ -204,7 +209,7 @@ export const useBotAI = ({ setCurrentAnimation }: UseBotAIProps) => {
         hasMovedRef.current = true;
 
         // Передаём ход игроку
-        setPlayerTurn(true);
+        setActivePlayer("beagle");
         setSelectedPiece(null);
         setValidMoves([]);
         setGameMessage(getPlayerTurnPromptMessage(gameMode));
@@ -231,12 +236,12 @@ export const useBotAI = ({ setCurrentAnimation }: UseBotAIProps) => {
 
     void makeAIMove();
   }, [
-    playerTurn,
+    activePlayer,
     gameOver,
     gameMode,
     isAnimating,
     animateMove,
-    setPlayerTurn,
+    setActivePlayer,
     setGameOver,
     setGameMessage,
     setSelectedPiece,

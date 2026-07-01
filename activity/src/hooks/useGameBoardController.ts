@@ -19,7 +19,7 @@ import {
 } from "../services/MoveService";
 import { checkGameStatus } from "../services/BoardService";
 import { useBotAI } from "./useBotAI";
-import { pieceUtils } from "../utils/gameHelpers";
+import { isMyTurn, pieceUtils } from "../utils/gameHelpers";
 import { logger } from "../utils/logger";
 import { useTransientActionLock } from "./useTransientActionLock";
 import type { CaptureSquareRef } from "../game/squareVisualState";
@@ -37,7 +37,7 @@ export interface UseGameBoardControllerArgs {
 export interface UseGameBoardControllerResult {
   board: Board;
   gameMode: GameMode;
-  playerTurn: boolean;
+  isMyTurn: boolean;
   gameOver: boolean;
   gameMessage: string;
   selectedPiece: Position | null;
@@ -54,14 +54,27 @@ export interface UseGameBoardControllerResult {
   setShowFpsInfo: Dispatch<SetStateAction<boolean>>;
 }
 
+function canLocalPlayerMove(
+  playMode: "solo_bot" | "discord_pvp",
+  activePlayer: Player,
+  myPlayer: Player | null
+): boolean {
+  if (playMode === "discord_pvp") {
+    return isMyTurn(activePlayer, myPlayer);
+  }
+  return activePlayer === "beagle";
+}
+
 export function useGameBoardController({
   onReturnToMenu,
 }: UseGameBoardControllerArgs): UseGameBoardControllerResult {
   const {
     board,
     setBoard,
-    playerTurn,
-    setPlayerTurn,
+    activePlayer,
+    setActivePlayer,
+    myPlayer,
+    playMode,
     selectedPiece,
     setSelectedPiece,
     validMoves,
@@ -72,6 +85,8 @@ export function useGameBoardController({
     setGameMessage,
     gameMode,
   } = useGame();
+
+  const localPlayerCanMove = canLocalPlayerMove(playMode, activePlayer, myPlayer);
 
   const [performanceMode, setPerformanceMode] = useState<PerformanceMode>(
     PERFORMANCE_MODES.HIGH
@@ -94,7 +109,7 @@ export function useGameBoardController({
 
   const piecesWithCaptures = useMemo(() => {
     try {
-      if (!playerTurn || !board) {
+      if (!localPlayerCanMove || !board) {
         return [] as PieceCaptureHighlight[];
       }
       return getPiecesWithCaptures(board, true, gameMode);
@@ -105,7 +120,7 @@ export function useGameBoardController({
       );
       return [] as PieceCaptureHighlight[];
     }
-  }, [board, playerTurn, gameMode]);
+  }, [board, localPlayerCanMove, gameMode]);
 
   const handlePerformanceData = useCallback(
     (fps: number, mode: PerformanceMode) => {
@@ -173,7 +188,15 @@ export function useGameBoardController({
 
   const handlePieceSelect = useCallback(
     (row: number, col: number) => {
-      if (gameOver || !playerTurn || isAnimating) {
+      if (gameOver || isAnimating) {
+        return;
+      }
+
+      if (playMode === "discord_pvp" && !isMyTurn(activePlayer, myPlayer)) {
+        return;
+      }
+
+      if (playMode === "solo_bot" && activePlayer !== "beagle") {
         return;
       }
 
@@ -222,7 +245,7 @@ export function useGameBoardController({
                 }
 
                 resetSelection();
-                setPlayerTurn(false);
+                setActivePlayer("corgi");
                 setGameMessage("Ход корги...");
 
                 const gameStatus = checkGameStatus(newBoard, gameMode);
@@ -257,13 +280,15 @@ export function useGameBoardController({
     },
     [
       gameOver,
-      playerTurn,
       isAnimating,
+      playMode,
+      activePlayer,
+      myPlayer,
       board,
       selectedPiece,
       validMoves,
       setBoard,
-      setPlayerTurn,
+      setActivePlayer,
       setGameMessage,
       handleGameOver,
       resetSelection,
@@ -303,7 +328,7 @@ export function useGameBoardController({
   return {
     board,
     gameMode,
-    playerTurn,
+    isMyTurn: localPlayerCanMove,
     gameOver,
     gameMessage,
     selectedPiece,

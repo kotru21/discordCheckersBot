@@ -10,7 +10,7 @@ import type {
 export interface MatchSliceForMode {
   board: Board;
   gameMode: GameMode;
-  playerTurn: boolean;
+  activePlayer: "beagle";
   gameOver: boolean;
   gameMessage: string;
   selectedPiece: Position | null;
@@ -21,7 +21,7 @@ export function createMatchSliceForMode(mode: GameMode): MatchSliceForMode {
   return {
     board: createInitialBoard() as Board,
     gameMode: mode,
-    playerTurn: true,
+    activePlayer: "beagle",
     gameOver: false,
     gameMessage: getModeStartMessage(mode),
     selectedPiece: null,
@@ -31,7 +31,7 @@ export function createMatchSliceForMode(mode: GameMode): MatchSliceForMode {
 
 export interface RestartSlice {
   board: Board;
-  playerTurn: boolean;
+  activePlayer: "beagle";
   gameOver: boolean;
   gameMessage: string;
   selectedPiece: Position | null;
@@ -43,7 +43,7 @@ export function createRestartSliceKeepingMode(
 ): RestartSlice {
   return {
     board: createInitialBoard() as Board,
-    playerTurn: true,
+    activePlayer: "beagle",
     gameOver: false,
     gameMessage: getModeStartMessage(currentMode),
     selectedPiece: null,

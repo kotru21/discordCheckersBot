@@ -23,7 +23,7 @@ export interface GameBoardHudProps {
   onOpenRules: () => void;
   onOpenModeSelector: () => void;
   onReturnToMenu: () => void;
-  playerTurn: boolean;
+  isMyTurn: boolean;
   gameOver: boolean;
   selectedPiece: Position | null;
 }
@@ -37,7 +37,7 @@ export function GameBoardHud({
   onOpenRules,
   onOpenModeSelector,
   onReturnToMenu,
-  playerTurn,
+  isMyTurn,
   gameOver,
   selectedPiece,
 }: GameBoardHudProps) {
@@ -92,7 +92,7 @@ export function GameBoardHud({
         </div>
       </div>
 
-      {playerTurn && !gameOver && (
+      {isMyTurn && !gameOver && (
         <div className="safe-pb safe-px pointer-events-none mt-auto flex justify-center pb-2 sm:pb-3">
           <p className="rounded-full bg-black/40 px-3 py-1 text-center text-[10px] text-zinc-200/95 shadow-sm backdrop-blur-md sm:text-[11px]">
             {selectedPiece

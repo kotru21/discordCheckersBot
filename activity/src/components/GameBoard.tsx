@@ -41,7 +41,7 @@ export function GameBoard({ onReturnToMenu }: GameBoardProps) {
         onOpenRules={() => setShowRules(true)}
         onOpenModeSelector={() => setModeSelectorOpen(true)}
         onReturnToMenu={ctrl.handleReturnToMenu}
-        playerTurn={ctrl.playerTurn}
+        isMyTurn={ctrl.isMyTurn}
         gameOver={ctrl.gameOver}
         selectedPiece={ctrl.selectedPiece}
       />

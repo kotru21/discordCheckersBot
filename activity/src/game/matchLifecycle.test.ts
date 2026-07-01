@@ -10,7 +10,7 @@ describe("matchLifecycle", () => {
     const classic = createMatchSliceForMode(GAME_MODES.CLASSIC);
     expect(classic.gameMode).toBe(GAME_MODES.CLASSIC);
     expect(classic.gameMessage).toBe("Классика · ваш ход");
-    expect(classic.playerTurn).toBe(true);
+    expect(classic.activePlayer).toBe("beagle");
     expect(classic.gameOver).toBe(false);
     expect(classic.selectedPiece).toBeNull();
     expect(classic.validMoves).toEqual([]);

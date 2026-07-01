@@ -5,12 +5,23 @@ import {
   createMatchSliceForMode,
   createRestartSliceKeepingMode,
 } from "../game/matchLifecycle";
-import type { Board, GameMode, Move, Position } from "@shared/types/game.types";
+import type {
+  Board,
+  GameMode,
+  Move,
+  Player,
+  Position,
+} from "@shared/types/game.types";
+
+export type PlayMode = "solo_bot" | "discord_pvp";
 
 export interface GameStore {
   board: Board;
   gameMode: GameMode;
-  playerTurn: boolean; // true = player, false = bot
+  playMode: PlayMode;
+  myPlayer: Player | null;
+  activePlayer: Player;
+  participants: string[];
   selectedPiece: Position | null;
   validMoves: Move[];
   gameOver: boolean;
@@ -19,7 +30,10 @@ export interface GameStore {
 
   setBoard: (board: Board) => void;
   setGameMode: (gameMode: GameMode) => void;
-  setPlayerTurn: (playerTurn: boolean) => void;
+  setPlayMode: (playMode: PlayMode) => void;
+  setMyPlayer: (myPlayer: Player | null) => void;
+  setActivePlayer: (activePlayer: Player) => void;
+  setParticipants: (participants: string[]) => void;
   setSelectedPiece: (selectedPiece: Position | null) => void;
   setValidMoves: (validMoves: Move[]) => void;
   setGameOver: (gameOver: boolean) => void;
@@ -36,7 +50,10 @@ const initialMessage = "Вы за биглей · ваш ход";
 export const useGameStore = create<GameStore>((set, get) => ({
   board: createInitialBoard() as Board,
   gameMode: GAME_MODES.CLASSIC as GameMode,
-  playerTurn: true,
+  playMode: "solo_bot",
+  myPlayer: null,
+  activePlayer: "beagle",
+  participants: [],
   selectedPiece: null,
   validMoves: [],
   gameOver: false,
@@ -45,7 +62,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   setBoard: (board) => set({ board }),
   setGameMode: (gameMode) => set({ gameMode }),
-  setPlayerTurn: (playerTurn) => set({ playerTurn }),
+  setPlayMode: (playMode) => set({ playMode }),
+  setMyPlayer: (myPlayer) => set({ myPlayer }),
+  setActivePlayer: (activePlayer) => set({ activePlayer }),
+  setParticipants: (participants) => set({ participants }),
   setSelectedPiece: (selectedPiece) => set({ selectedPiece }),
   setValidMoves: (validMoves) => set({ validMoves }),
   setGameOver: (gameOver) => set({ gameOver }),
@@ -60,7 +80,10 @@ export const useGameStore = create<GameStore>((set, get) => ({
       ...createRestartSliceKeepingMode(state.gameMode),
     })),
 
-  switchTurn: () => set({ playerTurn: !get().playerTurn }),
+  switchTurn: () =>
+    set({
+      activePlayer: get().activePlayer === "beagle" ? "corgi" : "beagle",
+    }),
 }));
 
 // Правильная перегрузка хука без условного вызова

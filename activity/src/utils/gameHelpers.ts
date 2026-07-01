@@ -7,7 +7,14 @@ import {
   BOARD_SIZE,
 } from "@shared/config/constants";
 import { logger } from "./logger";
-import type { Board, PieceType } from "@shared/types/game.types";
+import type { Board, PieceType, Player } from "@shared/types/game.types";
+
+export function isMyTurn(
+  activePlayer: Player,
+  myPlayer: Player | null
+): boolean {
+  return myPlayer !== null && activePlayer === myPlayer;
+}
 
 // Утилиты для работы с фигурами
 export const pieceUtils = {
