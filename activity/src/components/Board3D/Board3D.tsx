@@ -9,12 +9,10 @@ import { Canvas } from "@react-three/fiber";
 import {
   OrbitControls,
   PerspectiveCamera,
-  Environment,
   ContactShadows,
 } from "@react-three/drei";
 import { PieceMesh } from "./PieceMesh";
 import { buildPieceDescriptors } from "./buildPieceDescriptors";
-import { GAME_MODES } from "@shared/config/constants";
 import {
   BoardFrame,
   PerformanceMonitor,
@@ -116,9 +114,6 @@ function Board3DContent({
         />
         {renderPieces}
       </Suspense>
-      <Environment
-        preset={gameMode === GAME_MODES.PARTY_MODE ? "night" : "sunset"}
-      />
     </>
   );
 }

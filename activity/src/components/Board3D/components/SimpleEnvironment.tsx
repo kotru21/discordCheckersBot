@@ -24,16 +24,17 @@ export function SimpleEnvironment({ gameMode }: SimpleEnvironmentProps) {
 
   return (
     <>
-      <ambientLight intensity={0.5} color="#ffffff" />
+      <ambientLight intensity={0.65} color="#ffffff" />
       <directionalLight
         position={[5, 10, 5]}
-        intensity={0.8}
+        intensity={1}
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
         shadow-camera-far={15}
         color="#ffffff"
       />
+      <directionalLight position={[-8, 6, -4]} intensity={0.35} color="#fff8e7" />
       <pointLight position={[-5, 5, -5]} intensity={0.5} color="#f0f8ff" />
     </>
   );
