@@ -1,0 +1,19 @@
+{
+  "name": "discord-checkers-bot",
+  "private": true,
+  "workspaces": ["activity", "server", "bot"],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:activity": "bun run --cwd activity dev",
+    "dev:server": "bun run --cwd server dev",
+    "dev:bot": "bun run --cwd bot dev",
+    "build": "bun run --cwd activity build",
+    "test": "bun run --cwd activity test",
+    "lint": "eslint . --config eslint.config.ts",
+    "lint:fix": "eslint . --config eslint.config.ts --fix",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx}\"",
+    "typecheck": "bun run --cwd activity typecheck && bun run --cwd server typecheck",
+    "check": "bun run lint && bun run typecheck && bun run test"
+  }
+}
