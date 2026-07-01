@@ -1,0 +1,8 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bun run --cwd activity build",
+  "devCommand": "bun run --cwd activity dev",
+  "installCommand": "bun install",
+  "outputDirectory": "activity/dist",
+  "framework": "vite"
+}
