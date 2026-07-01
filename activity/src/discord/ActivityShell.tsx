@@ -1,18 +1,8 @@
-import {
-  createContext,
-  useContext,
-  type ReactNode,
-} from "react";
+import type { ReactNode } from "react";
 import { useDiscordSession } from "./useDiscordSession";
-import type { DiscordSession } from "./bootstrap";
+import { DiscordSessionContext } from "./discordSessionContext";
 
 const inDiscord = new URLSearchParams(window.location.search).has("frame_id");
-
-const DiscordSessionContext = createContext<DiscordSession | null>(null);
-
-export function useDiscordSessionContext(): DiscordSession | null {
-  return useContext(DiscordSessionContext);
-}
 
 function DiscordActivityShell({ children }: { children: ReactNode }) {
   const { session, loading, error } = useDiscordSession();

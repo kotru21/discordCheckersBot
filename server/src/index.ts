@@ -105,4 +105,4 @@ Bun.serve<WsData>({
   },
 });
 
-console.log(`Server listening on :${port}`);
+console.warn(`Server listening on :${port}`);

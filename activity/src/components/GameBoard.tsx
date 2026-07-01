@@ -5,7 +5,7 @@ import { ModeSelector } from "./ModeSelector";
 import { GameBoardHud } from "./GameBoardHud";
 import { GameOverSheet } from "./GameOverSheet";
 import { useGameBoardController } from "../hooks/useGameBoardController";
-import { useDiscordSessionContext } from "../discord/ActivityShell";
+import { useDiscordSessionContext } from "../discord/discordSessionContext";
 import { useMultiplayerSync } from "../multiplayer/useMultiplayerSync";
 
 interface GameBoardProps {

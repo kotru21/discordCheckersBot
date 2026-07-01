@@ -3,7 +3,7 @@ import { GameProvider } from "./contexts/GameContext";
 import { GameBoard } from "./components/GameBoard";
 import { MainMenu } from "./components/MainMenu";
 import { ActivityLobby } from "./discord/ActivityLobby";
-import { useDiscordSessionContext } from "./discord/ActivityShell";
+import { useDiscordSessionContext } from "./discord/discordSessionContext";
 
 const inDiscord = new URLSearchParams(window.location.search).has("frame_id");
 
