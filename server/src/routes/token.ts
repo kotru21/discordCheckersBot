@@ -1,4 +1,5 @@
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
+const DISCORD_ACTIVITY_REDIRECT_URI = "https://127.0.0.1";
 
 export async function exchangeCodeForToken(code: string): Promise<{ access_token: string }> {
   if (!code.trim()) {
@@ -16,6 +17,7 @@ export async function exchangeCodeForToken(code: string): Promise<{ access_token
     client_secret: clientSecret,
     grant_type: "authorization_code",
     code,
+    redirect_uri: DISCORD_ACTIVITY_REDIRECT_URI,
   });
 
   const response = await fetch(DISCORD_TOKEN_URL, {
@@ -26,6 +28,7 @@ export async function exchangeCodeForToken(code: string): Promise<{ access_token
 
   if (!response.ok) {
     const text = await response.text();
+    console.error("Discord token exchange failed:", response.status, text);
     throw new Error(`Discord token exchange failed: ${response.status} ${text}`);
   }
 

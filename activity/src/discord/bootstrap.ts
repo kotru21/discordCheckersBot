@@ -46,10 +46,14 @@ export async function bootstrapDiscordSession(): Promise<DiscordSession> {
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code }),
   }).then(async (r) => {
+    const payload = (await r.json()) as { access_token?: string; error?: string };
     if (!r.ok) {
-      throw new Error("Token exchange failed");
+      throw new Error(payload.error ?? "Token exchange failed");
     }
-    return r.json() as Promise<{ access_token: string }>;
+    if (!payload.access_token) {
+      throw new Error("Token exchange returned no access_token");
+    }
+    return payload as { access_token: string };
   });
 
   const auth = await discordSdk.commands.authenticate({ access_token });
