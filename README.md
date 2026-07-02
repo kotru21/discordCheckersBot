@@ -51,7 +51,7 @@ Based on the standalone game [CorgiBigleCheckers](https://github.com/kotru21/Cor
 4. Register slash commands (once per app/guild):
 
    ```bash
-   bun run register-commands --cwd bot
+   bun run --cwd bot register-commands
    ```
 
 5. Open the Activity URL from the Discord Developer Portal (see below) or use Activity dev tooling with your local Vite URL.
@@ -204,7 +204,7 @@ After deploy, update `VITE_API_HOST` on Vercel to match the server’s public ho
 Run `bot/` on any Node/Bun host with `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, and optionally `DISCORD_GUILD_ID`. Register commands with:
 
 ```bash
-bun run register-commands --cwd bot
+bun run --cwd bot register-commands
 ```
 
 ## How to play
