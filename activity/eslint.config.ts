@@ -1,9 +1,12 @@
-import { defineConfig } from "eslint/config";
+import path from "path";
+import { fileURLToPath } from "url";import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
 import globals from "globals";
 import reactHooks from "eslint-plugin-react-hooks";
 import reactRefresh from "eslint-plugin-react-refresh";
 import tseslint from "typescript-eslint";
+
+const activityRoot = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig([
   { ignores: ["dist", "node_modules", "*.config.js", "*.config.ts"] },
@@ -22,6 +25,7 @@ export default defineConfig([
       parserOptions: {
         ecmaFeatures: { jsx: true },
         sourceType: "module",
+        tsconfigRootDir: activityRoot,
       },
     },
     plugins: {

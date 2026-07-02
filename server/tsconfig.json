@@ -8,7 +8,8 @@
     "types": ["bun-types"],
     "noEmit": true,
     "paths": {
-      "@shared/*": ["../activity/src/shared/*"]
+      "@discord-checkers/game": ["../packages/game/src/index.ts"],
+      "@discord-checkers/game/*": ["../packages/game/src/*"]
     }
   },
   "include": ["src/**/*"]

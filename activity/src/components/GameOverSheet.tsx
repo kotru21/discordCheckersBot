@@ -2,12 +2,14 @@ export interface GameOverSheetProps {
   title: string;
   onNewGame: () => void;
   onReturnToMenu: () => void;
+  showNewGame?: boolean;
 }
 
 export function GameOverSheet({
   title,
   onNewGame,
   onReturnToMenu,
+  showNewGame = true,
 }: GameOverSheetProps) {
   return (
     <div
@@ -23,12 +25,14 @@ export function GameOverSheet({
           {title}
         </h2>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-3">
-          <button
-            type="button"
-            onClick={onNewGame}
-            className="min-h-11 flex-1 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-zinc-950 shadow-lg transition-[filter] duration-200 cursor-pointer hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-300">
-            Новая игра
-          </button>
+          {showNewGame && (
+            <button
+              type="button"
+              onClick={onNewGame}
+              className="min-h-11 flex-1 rounded-xl bg-orange-600 px-4 py-2.5 text-sm font-bold text-zinc-950 shadow-lg transition-[filter] duration-200 cursor-pointer hover:brightness-110 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange-300">
+              Новая игра
+            </button>
+          )}
           <button
             type="button"
             onClick={onReturnToMenu}

@@ -36,6 +36,8 @@ function Board3DContent({
   piecesWithCaptures = [],
   gameMode,
   currentAnimation,
+  myPlayer = null,
+  playMode = "solo_bot",
 }: Board3DContentProps) {
   const [performanceMode, setPerformanceMode] =
     useState<PerformanceMode>("high");
@@ -57,8 +59,15 @@ function Board3DContent({
   });
 
   const pieceDescriptors = useMemo(
-    () => buildPieceDescriptors(board, selectedPiece, currentAnimation ?? null),
-    [board, selectedPiece, currentAnimation]
+    () =>
+      buildPieceDescriptors(
+        board,
+        selectedPiece,
+        currentAnimation ?? null,
+        myPlayer,
+        playMode
+      ),
+    [board, selectedPiece, currentAnimation, myPlayer, playMode]
   );
 
   const renderPieces = useMemo<ReactElement[]>(
@@ -127,6 +136,8 @@ export function Board3D({
   piecesWithCaptures = [],
   gameMode,
   currentAnimation,
+  myPlayer = null,
+  playMode = "solo_bot",
 }: Board3DProps) {
   const performanceHandler = onPerformanceData ?? (() => {});
 
@@ -150,6 +161,8 @@ export function Board3D({
         piecesWithCaptures={piecesWithCaptures}
         gameMode={gameMode}
         currentAnimation={currentAnimation}
+        myPlayer={myPlayer ?? null}
+        playMode={playMode ?? "solo_bot"}
       />
     </Canvas>
   );

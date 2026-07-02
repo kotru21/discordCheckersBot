@@ -14,7 +14,7 @@ describe("buildPieceDescriptors", () => {
     expect(buildPieceDescriptors(emptyBoard(), null, null)).toEqual([]);
   });
 
-  it("marks player pieces as pointer targets", () => {
+  it("marks player pieces as pointer targets in solo mode", () => {
     const board = emptyBoard();
     board[3][4] = PLAYER;
     board[3][5] = BOT;
@@ -27,6 +27,17 @@ describe("buildPieceDescriptors", () => {
     expect(corgi?.pointerTarget).toBe(false);
     expect(king?.isKing).toBe(true);
     expect(king?.pointerTarget).toBe(true);
+  });
+
+  it("marks corgi pieces as pointer targets when playing as corgi in pvp", () => {
+    const board = emptyBoard();
+    board[3][4] = PLAYER;
+    board[3][5] = BOT;
+    const list = buildPieceDescriptors(board, null, null, "corgi", "discord_pvp");
+    const beagle = list.find((p) => p.boardRow === 3 && p.boardCol === 4);
+    const corgi = list.find((p) => p.boardRow === 3 && p.boardCol === 5);
+    expect(beagle?.pointerTarget).toBe(false);
+    expect(corgi?.pointerTarget).toBe(true);
   });
 
   it("sets animationId when currentAnimation starts from that cell", () => {

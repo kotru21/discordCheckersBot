@@ -1,13 +1,10 @@
-// Re-export from new modular structure
-export { getAllPossibleCaptures } from "./move/captures";
-export { executeMove } from "./move/executeMove";
-export { getValidMoves } from "./move/validMoves";
 export {
+  getAllPossibleCaptures,
+  executeMove,
+  getValidMoves,
   hasCaptures,
   getPiecesWithCaptures,
   getValidMovesWithCapturePriority,
-} from "./move/capturePriority";
-export {
   isEnemyPiece,
   getPieceInfo,
   getMoveDirections,
@@ -16,4 +13,4 @@ export {
   findKingCaptures,
   findRegularCaptures,
   type CaptureResolver,
-} from "./move/helpers";
+} from "@discord-checkers/game";

@@ -2,6 +2,7 @@ export interface WsData {
   instanceId: string;
   userId: string | null;
   authenticated: boolean;
+  rateLimitKey: string;
 }
 
 export interface AuthMessage {
@@ -19,7 +20,11 @@ export interface MoveMessage {
   };
 }
 
-export type ClientMessage = AuthMessage | MoveMessage;
+export interface RematchMessage {
+  type: "rematch";
+}
+
+export type ClientMessage = AuthMessage | MoveMessage | RematchMessage;
 
 export type ServerMessage =
   | { type: "auth_required" }

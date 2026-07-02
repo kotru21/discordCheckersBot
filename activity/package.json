@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host",
-    "build": "vite build",
+    "build": "bun run scripts/sync-vercel-api-rewrite.ts && vite build",
     "lint": "eslint . --config eslint.config.ts",
     "lint:fix": "eslint . --config eslint.config.ts --fix",
     "format": "prettier --write \"src/**/*.{ts,tsx}\"",
@@ -16,6 +16,7 @@
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@discord-checkers/game": "workspace:*",
     "@discord/embedded-app-sdk": "^2.5.0",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.5.0",

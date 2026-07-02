@@ -26,6 +26,8 @@ export interface GameBoardHudProps {
   isMyTurn: boolean;
   gameOver: boolean;
   selectedPiece: Position | null;
+  isDiscordPvP?: boolean;
+  myPlayer?: "beagle" | "corgi" | null;
 }
 
 export function GameBoardHud({
@@ -40,6 +42,8 @@ export function GameBoardHud({
   isMyTurn,
   gameOver,
   selectedPiece,
+  isDiscordPvP = false,
+  myPlayer = null,
 }: GameBoardHudProps) {
   const perfDotClass = perfDotClassForMode(performanceMode);
 
@@ -75,13 +79,15 @@ export function GameBoardHud({
             title="Правила">
             ?
           </button>
-          <button
-            type="button"
-            onClick={onOpenModeSelector}
-            className={HUD_BTN_CLASS}
-            title="Сменить режим">
-            Режим
-          </button>
+          {!isDiscordPvP && (
+            <button
+              type="button"
+              onClick={onOpenModeSelector}
+              className={HUD_BTN_CLASS}
+              title="Сменить режим">
+              Режим
+            </button>
+          )}
           <button
             type="button"
             onClick={onReturnToMenu}
@@ -97,7 +103,9 @@ export function GameBoardHud({
           <p className="rounded-full bg-black/40 px-3 py-1 text-center text-[10px] text-zinc-200/95 shadow-sm backdrop-blur-md sm:text-[11px]">
             {selectedPiece
               ? "Коснитесь клетки для хода"
-              : "Коснитесь бигля, чтобы походить"}
+              : myPlayer === "corgi"
+                ? "Коснитесь корги, чтобы походить"
+                : "Коснитесь бигля, чтобы походить"}
           </p>
         </div>
       )}

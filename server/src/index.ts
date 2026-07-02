@@ -1,10 +1,13 @@
 import { Hono } from "hono";
+import { isProductionInstanceId } from "./auth/validateActivityInstance";
 import { createRateLimiter, getClientIp } from "./middleware/rateLimit";
 import { securityHeaders } from "./middleware/securityHeaders";
 import { RoomRegistry } from "./rooms/roomRegistry";
 import { exchangeCodeForToken } from "./routes/token";
+import { tokenBodySchema } from "./validation/schemas";
 import { createWebSocketHandlers } from "./ws/handleMessage";
 import type { WsData } from "./ws/types";
+import { logger } from "./logger";
 
 const tokenRateLimit = createRateLimiter(20, 60_000);
 const roomRegistry = new RoomRegistry();
@@ -20,11 +23,16 @@ app.post("/api/token", async (c) => {
   }
 
   try {
-    const { code } = (await c.req.json()) as { code?: string };
-    const token = await exchangeCodeForToken(code ?? "");
-    return c.json(token);
+    const body = tokenBodySchema.safeParse(await c.req.json());
+    if (!body.success) {
+      return c.json({ error: "Invalid request body" }, 400);
+    }
+    const token = await exchangeCodeForToken(body.data.code);
+    return c.json({ access_token: token.access_token });
   } catch (error) {
-    console.error("Token exchange error:", error);
+    logger.error("Token exchange error", {
+      error: error instanceof Error ? error.message : "unknown",
+    });
     return c.json({ error: "Token exchange failed" }, 400);
   }
 });
@@ -39,9 +47,18 @@ Bun.serve<WsData>({
   fetch(req, server) {
     const url = new URL(req.url);
     if (url.pathname === "/api/ws") {
-      const instanceId = url.searchParams.get("instanceId") ?? "local";
+      const rawInstanceId = url.searchParams.get("instanceId");
+      if (Bun.env.NODE_ENV === "production" && !isProductionInstanceId(rawInstanceId)) {
+        return new Response("Invalid instanceId", { status: 400 });
+      }
+      const instanceId = rawInstanceId ?? "local";
       const upgraded = server.upgrade(req, {
-        data: { instanceId, userId: null, authenticated: false },
+        data: {
+          instanceId,
+          userId: null,
+          authenticated: false,
+          rateLimitKey: crypto.randomUUID(),
+        },
       });
       if (upgraded) {
         return undefined;
@@ -53,4 +70,4 @@ Bun.serve<WsData>({
   websocket: wsHandlers,
 });
 
-console.warn(`Server listening on :${port}`);
+logger.info("Server listening", { port });

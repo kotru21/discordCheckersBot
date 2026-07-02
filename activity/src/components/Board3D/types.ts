@@ -1,6 +1,7 @@
 import type { ReactElement } from "react";
-import type { Board, GameMode, Move, Position } from "@shared/types/game.types";
+import type { Board, GameMode, Move, Player, Position } from "@shared/types/game.types";
 import type { PieceAnimationInfo } from "@shared/types/pieceAnimation.types";
+import type { PlayMode } from "../../store/gameStore";
 
 export type { PieceAnimationInfo };
 
@@ -33,6 +34,8 @@ export interface Board3DContentProps {
   piecesWithCaptures?: CaptureInfo[];
   gameMode: GameMode;
   currentAnimation?: PieceAnimationInfo | null | undefined;
+  myPlayer?: Player | null;
+  playMode?: PlayMode;
 }
 
 export interface Board3DProps {
@@ -44,6 +47,8 @@ export interface Board3DProps {
   piecesWithCaptures?: CaptureInfo[];
   gameMode: GameMode;
   currentAnimation?: PieceAnimationInfo | null | undefined;
+  myPlayer?: Player | null;
+  playMode?: PlayMode;
 }
 
 export interface PerformanceMonitorProps {

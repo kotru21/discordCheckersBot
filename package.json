@@ -1,24 +1,25 @@
 {
   "name": "discord-checkers-bot",
   "private": true,
-  "workspaces": ["activity", "server", "bot"],
+  "workspaces": ["activity", "server", "bot", "packages/game"],
   "scripts": {
     "dev": "bun run --filter '*' dev",
     "dev:activity": "bun run --cwd activity dev",
     "dev:server": "bun run --cwd server dev",
     "dev:bot": "bun run --cwd bot dev",
     "build": "bun run --cwd activity build",
-    "test": "bun run --cwd activity test && bun test server/src",
+    "test": "bun run --cwd activity test && bun test server/src && bun test packages/game/src",
     "lint": "eslint . --config eslint.config.ts",
     "lint:fix": "eslint . --config eslint.config.ts --fix",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx}\"",
-    "typecheck": "bun run --cwd activity typecheck && bun run --cwd server typecheck",
+    "typecheck": "bun run --cwd activity typecheck && bun run --cwd server typecheck && bun run --cwd bot typecheck && bun run --cwd packages/game typecheck",
     "check": "bun run lint && bun run typecheck && bun run test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@socketsecurity/bun-security-scanner": "^1.1.2",
+    "@types/node": "^25.6.0",
     "eslint": "^10.6.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.3",

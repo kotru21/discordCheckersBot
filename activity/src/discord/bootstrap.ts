@@ -3,20 +3,10 @@ import {
   DiscordSDKMock,
   patchUrlMappings,
 } from "@discord/embedded-app-sdk";
+import { resolveApiHost } from "@shared/config/apiHost";
 
 const clientId =
   import.meta.env.VITE_DISCORD_CLIENT_ID ?? "0000000000000000000";
-
-const PRODUCTION_API_HOST = "discord-checkers-server-2dbcedabcdf8.herokuapp.com";
-
-function resolveApiHost(): string {
-  const raw = import.meta.env.VITE_API_HOST ?? (import.meta.env.PROD ? PRODUCTION_API_HOST : "localhost:3001");
-  return raw.replace(/^https?:\/\//, "").replace(/\/$/, "");
-}
-
-function buildApiUrl(path: string): string {
-  return `https://${resolveApiHost()}${path.startsWith("/") ? path : `/${path}`}`;
-}
 
 async function readApiJson<T>(response: Response): Promise<T> {
   const text = await response.text();
@@ -67,7 +57,7 @@ export async function bootstrapDiscordSession(): Promise<BootstrapResult> {
     scope: ["identify", "guilds", "rpc.activities.write"],
   });
 
-  const { access_token } = await fetch(buildApiUrl("/api/token"), {
+  const { access_token } = await fetch("/api/token", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ code }),

@@ -1,3 +1,5 @@
+import { logger } from "../logger";
+
 const ACTIVITY_INSTANCE_URL =
   "https://discord.com/api/applications";
 
@@ -38,11 +40,10 @@ export async function fetchActivityInstance(
   }
 
   if (!response.ok) {
-    console.error(
-      "Activity instance lookup failed:",
-      response.status,
-      await response.text()
-    );
+    logger.error("Activity instance lookup failed", {
+      status: response.status,
+      body: (await response.text()).slice(0, 200),
+    });
     throw new Error("Activity instance lookup failed");
   }
 
@@ -64,7 +65,15 @@ export async function fetchActivityInstance(
 }
 
 export function isLocalDevInstance(instanceId: string): boolean {
-  return instanceId === "local";
+  if (instanceId !== "local") {
+    return false;
+  }
+  return Bun.env.NODE_ENV !== "production";
+}
+
+export function isProductionInstanceId(instanceId: string | null): boolean {
+  const id = instanceId?.trim() ?? "";
+  return id.length > 0 && id !== "local";
 }
 
 export async function assertUserInActivityInstance(

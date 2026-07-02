@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Board3D } from "./Board3D";
 import RulesModal from "./RulesModal";
 import { ModeSelector } from "./ModeSelector";
@@ -7,6 +7,7 @@ import { GameOverSheet } from "./GameOverSheet";
 import { useGameBoardController } from "../hooks/useGameBoardController";
 import { useDiscordSessionContext } from "../discord/discordSessionContext";
 import { useMultiplayerSync } from "../multiplayer/useMultiplayerSync";
+import type { PvpBoardSyncBridge } from "../multiplayer/usePvpBoardSync";
 
 interface GameBoardProps {
   onReturnToMenu: () => void;
@@ -14,8 +15,14 @@ interface GameBoardProps {
 
 export function GameBoard({ onReturnToMenu }: GameBoardProps) {
   const session = useDiscordSessionContext();
-  const { sendMove } = useMultiplayerSync(session);
-  const ctrl = useGameBoardController({ onReturnToMenu, sendMove });
+  const pvpBridgeRef = useRef<PvpBoardSyncBridge | null>(null);
+  const { sendMove, sendRematch } = useMultiplayerSync(session, pvpBridgeRef);
+  const ctrl = useGameBoardController({
+    onReturnToMenu,
+    sendMove,
+    sendRematch,
+    pvpBridgeRef,
+  });
   const [showRules, setShowRules] = useState(false);
   const [modeSelectorOpen, setModeSelectorOpen] = useState(false);
 
@@ -33,6 +40,8 @@ export function GameBoard({ onReturnToMenu }: GameBoardProps) {
           piecesWithCaptures={ctrl.piecesWithCaptures}
           gameMode={ctrl.gameMode}
           currentAnimation={ctrl.currentAnimation}
+          myPlayer={ctrl.myPlayer}
+          playMode={ctrl.playMode}
         />
       </div>
 
@@ -48,6 +57,8 @@ export function GameBoard({ onReturnToMenu }: GameBoardProps) {
         isMyTurn={ctrl.isMyTurn}
         gameOver={ctrl.gameOver}
         selectedPiece={ctrl.selectedPiece}
+        isDiscordPvP={ctrl.playMode === "discord_pvp"}
+        myPlayer={ctrl.myPlayer}
       />
 
       {ctrl.gameOver && (
@@ -55,11 +66,12 @@ export function GameBoard({ onReturnToMenu }: GameBoardProps) {
           title={ctrl.gameMessage}
           onNewGame={ctrl.handleNewGame}
           onReturnToMenu={ctrl.handleReturnToMenu}
+          showNewGame={true}
         />
       )}
 
       {showRules && <RulesModal onClose={() => setShowRules(false)} />}
-      {modeSelectorOpen && (
+      {modeSelectorOpen && ctrl.playMode !== "discord_pvp" && (
         <ModeSelector onClose={() => setModeSelectorOpen(false)} />
       )}
     </div>

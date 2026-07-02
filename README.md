@@ -10,7 +10,7 @@ Based on the standalone game [CorgiBigleCheckers](https://github.com/kotru21/Cor
 | ---------- | ----------- | -------------------------------------------------------------------------- |
 | `activity` | `activity/` | Vite + React 3D client (Discord iframe)                                    |
 | `server`   | `server/`   | Bun + Hono API, OAuth token exchange, WebSocket game rooms                 |
-| `bot`      | `bot/`      | Optional Discord bot — `/checkers` slash command to launch the Activity  |
+| `bot`      | `bot/`      | Optional Discord bot — `/checkers` slash command to launch the Activity    |
 
 ## Prerequisites
 
@@ -106,10 +106,10 @@ Deploy the `activity/` package as a static Vite site.
 
 - **Project:** `discord-checkers-bot-activity` (not the repo-root `discord-checkers-bot` project unless you intentionally use that URL)
 - **Root directory:** `activity`
-- **Build command:** `bun run build` (see `activity/vercel.json`)
+- **Build command:** `bun run build` (runs `sync-vercel-api-rewrite.ts` then Vite; requires `VITE_API_HOST` on Vercel)
 - **Output directory:** `dist`
 - **Install command:** `cd .. && bun install` (monorepo workspace)
-- **API proxy:** `activity/vercel.json` rewrites `/api/*` to Heroku — do **not** add `middleware.ts` or `activity/api/` on this project (breaks Bun workspace deploy with `npm install` error)
+- **API proxy:** `activity/vercel.json` rewrites `/api/*` to your Heroku server — set the `destination` host to match `VITE_API_HOST` (no `https://` prefix in the env var). Do **not** add `middleware.ts` or `activity/api/` on this project (breaks Bun workspace deploy with `npm install` error)
 - **Environment variables:**
   - `VITE_DISCORD_CLIENT_ID` — Discord application client ID
   - `VITE_API_HOST` — public host of the game server **without** `https://` (e.g. `discord-checkers-server.herokuapp.com`)
@@ -130,6 +130,14 @@ On **Vercel**, set:
 VITE_DISCORD_CLIENT_ID=848160407424073768
 VITE_API_HOST=discord-checkers-server-2dbcedabcdf8.herokuapp.com
 ```
+
+**GitHub Actions auto-deploy** (`.github/workflows/deploy-vercel.yml`) runs after CI on push to `main`. Add repository secrets:
+
+| Secret | Description |
+| ------ | ----------- |
+| `VERCEL_TOKEN` | Vercel account token |
+| `VERCEL_ORG_ID` | Team / user ID from Vercel project settings |
+| `VERCEL_PROJECT_ID` | Activity project ID (`activity/` root directory) |
 
 ### Server → Heroku (recommended for you)
 
@@ -153,8 +161,11 @@ Deploy `server/` as a **Docker** web dyno (Bun + WebSocket).
    ```bash
    heroku config:set DISCORD_CLIENT_ID=your_client_id -a discord-checkers-server
    heroku config:set DISCORD_CLIENT_SECRET=your_client_secret -a discord-checkers-server
+   heroku config:set DISCORD_TOKEN=your_bot_token -a discord-checkers-server
    heroku config:set SERVER_PUBLIC_HOST=discord-checkers-server.herokuapp.com -a discord-checkers-server
    ```
+
+   `DISCORD_TOKEN` is required for WebSocket auth (Activity Instance API membership checks), not only for the optional slash-command bot.
 
 4. Deploy (uses root `heroku.yml` → `server/Dockerfile`):
 
@@ -217,6 +228,31 @@ bun run --cwd bot register-commands
 4. Play international 10×10 checkers on the 3D board — moves sync over WebSocket in real time.
 
 Outside Discord, the activity still runs in the browser with the original solo vs bot modes (see `activity/README.md`).
+
+## Production deploy checklist
+
+Before launching the Discord Activity in production:
+
+1. **Heroku server**
+   - [ ] `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_TOKEN`, `SERVER_PUBLIC_HOST` set
+   - [ ] `curl https://<SERVER_PUBLIC_HOST>/api/health` returns `{"ok":true}`
+   - [ ] Container stack enabled (`heroku stack:set container`)
+
+2. **Vercel activity**
+   - [ ] `VITE_DISCORD_CLIENT_ID` and `VITE_API_HOST` match Heroku host (no `https://`)
+   - [ ] `activity/vercel.json` rewrite destination matches `VITE_API_HOST`
+   - [ ] GitHub secrets `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` configured (for CI deploy)
+
+3. **Discord Developer Portal**
+   - [ ] Activity URL points to Vercel production URL
+   - [ ] URL Mapping `/api` → server host
+   - [ ] OAuth2 redirect `https://127.0.0.1` added
+
+4. **Smoke test**
+   - [ ] Two accounts join voice channel → Activity loads
+   - [ ] OAuth completes (`/api/token` via Vercel proxy)
+   - [ ] WebSocket auth succeeds (not `instanceId=local` in production)
+   - [ ] Move syncs with animation; rematch works after game over
 
 ## License
 

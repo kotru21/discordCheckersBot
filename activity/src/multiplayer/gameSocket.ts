@@ -1,4 +1,5 @@
 import type { Board, Player } from "@shared/types/game.types";
+import { buildWebSocketUrl } from "@shared/config/apiHost";
 
 export interface RoomStatePayload {
   board: Board;
@@ -33,21 +34,8 @@ type ServerMessage =
   | AuthRequiredMessage
   | AuthOkMessage;
 
-function resolveApiHost(): string {
-  const productionHost = "discord-checkers-server-2dbcedabcdf8.herokuapp.com";
-  const raw =
-    import.meta.env.VITE_API_HOST ??
-    (import.meta.env.PROD ? productionHost : "localhost:3001");
-  return raw.replace(/^https?:\/\//, "").replace(/\/$/, "");
-}
-
-function buildWebSocketUrl(instanceId: string): string {
-  const query = `instanceId=${encodeURIComponent(instanceId)}`;
-  const host = resolveApiHost();
-  const protocol =
-    import.meta.env.PROD || host !== "localhost:3001" ? "wss" : "ws";
-  return `${protocol}://${host}/api/ws?${query}`;
-}
+const MAX_RECONNECT_ATTEMPTS = 8;
+const BASE_RECONNECT_MS = 1000;
 
 function parseServerMessage(raw: string): ServerMessage | null {
   try {
@@ -57,36 +45,116 @@ function parseServerMessage(raw: string): ServerMessage | null {
   }
 }
 
-export function connectGameSocket(
+export interface GameSocketCallbacks {
+  onState: (msg: RoomStateMessage) => void;
+  onError?: (message: string) => void;
+  onConnectionChange?: (connected: boolean) => void;
+}
+
+export interface GameSocketConnection {
+  close: () => void;
+  sendMove: (
+    fromRow: number,
+    fromCol: number,
+    toRow: number,
+    toCol: number
+  ) => void;
+  sendRematch: () => void;
+}
+
+export function createGameSocketConnection(
   instanceId: string,
   accessToken: string,
-  onState: (msg: RoomStateMessage) => void,
-  onError?: (message: string) => void
-): WebSocket {
-  const socket = new WebSocket(buildWebSocketUrl(instanceId));
+  callbacks: GameSocketCallbacks
+): GameSocketConnection {
+  let socket: WebSocket | null = null;
+  let closed = false;
+  let reconnectAttempts = 0;
+  let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
   const authenticate = () => {
-    socket.send(JSON.stringify({ type: "auth", accessToken }));
+    socket?.send(JSON.stringify({ type: "auth", accessToken }));
   };
 
-  socket.addEventListener("open", authenticate);
-
-  socket.addEventListener("message", (event) => {
-    const data = parseServerMessage(String(event.data));
-    if (!data) {
-      onError?.("Invalid server message");
+  const scheduleReconnect = () => {
+    if (closed || reconnectAttempts >= MAX_RECONNECT_ATTEMPTS) {
+      if (!closed) {
+        callbacks.onError?.("Connection lost");
+      }
       return;
     }
+    const delay = BASE_RECONNECT_MS * 2 ** reconnectAttempts;
+    reconnectAttempts++;
+    reconnectTimer = setTimeout(connect, delay);
+  };
 
-    if (data.type === "state") {
-      onState(data);
-      return;
-    }
+  const connect = () => {
+    socket = new WebSocket(buildWebSocketUrl(instanceId));
 
-    if (data.type === "error") {
-      onError?.(data.message ?? "Request failed");
-    }
-  });
+    socket.addEventListener("open", () => {
+      reconnectAttempts = 0;
+      callbacks.onConnectionChange?.(true);
+      authenticate();
+    });
 
-  return socket;
+    socket.addEventListener("message", (event) => {
+      const data = parseServerMessage(String(event.data));
+      if (!data) {
+        callbacks.onError?.("Invalid server message");
+        return;
+      }
+
+      if (data.type === "state") {
+        callbacks.onState(data);
+        return;
+      }
+
+      if (data.type === "error") {
+        callbacks.onError?.(data.message ?? "Request failed");
+      }
+    });
+
+    socket.addEventListener("close", () => {
+      callbacks.onConnectionChange?.(false);
+      socket = null;
+      if (!closed) {
+        scheduleReconnect();
+      }
+    });
+
+    socket.addEventListener("error", () => {
+      callbacks.onError?.("WebSocket error");
+    });
+  };
+
+  connect();
+
+  return {
+    close: () => {
+      closed = true;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      socket?.close();
+      socket = null;
+    },
+    sendMove(fromRow, fromCol, toRow, toCol) {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      socket.send(
+        JSON.stringify({
+          type: "move",
+          move: { fromRow, fromCol, toRow, toCol },
+        })
+      );
+    },
+    sendRematch() {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+      socket.send(JSON.stringify({ type: "rematch" }));
+    },
+  };
 }

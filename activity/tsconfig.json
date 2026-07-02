@@ -15,7 +15,9 @@
       "@widgets/*": ["./src/widgets/*"],
       "@features/*": ["./src/features/*"],
       "@entities/*": ["./src/entities/*"],
-      "@shared/*": ["./src/shared/*"]
+      "@shared/*": ["./src/shared/*"],
+      "@discord-checkers/game": ["../packages/game/src/index.ts"],
+      "@discord-checkers/game/*": ["../packages/game/src/*"]
     },
     "allowJs": false,
     "checkJs": false,
@@ -23,6 +25,6 @@
     "resolveJsonModule": true,
     "noEmit": true
   },
-  "include": ["src", "vite.config.ts"],
+  "include": ["src", "vite.config.ts", "eslint.config.ts"],
   "exclude": ["node_modules", "dist"]
 }

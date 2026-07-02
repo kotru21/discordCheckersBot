@@ -2,19 +2,16 @@ FROM oven/bun:1.3
 
 WORKDIR /app
 
-# Monorepo: server imports game logic from activity/src
 COPY package.json bun.lock ./
 COPY server/package.json ./server/
-COPY activity/package.json ./activity/
+COPY packages/game/package.json ./packages/game/
 RUN bun install --frozen-lockfile
 
 COPY server ./server
-COPY activity/src ./activity/src
-COPY activity/tsconfig.json ./activity/tsconfig.json
+COPY packages/game ./packages/game
 
 WORKDIR /app/server
 
-# Heroku sets PORT at runtime
 ENV NODE_ENV=production
 
 CMD ["bun", "start"]

@@ -1,0 +1,18 @@
+{
+  "name": "@discord-checkers/game",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./config/constants": "./src/config/constants.ts",
+    "./types/game.types": "./src/types/game.types.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "bun-types": "^1.3.14",
+    "typescript": "^6.0.3"
+  }
+}

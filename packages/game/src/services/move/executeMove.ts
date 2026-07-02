@@ -5,10 +5,10 @@ import {
   PLAYER,
   PLAYER_KING,
   EMPTY,
-} from "@shared/config/constants";
+} from "../../config/constants";
 import { boardUtils, validationUtils } from "../../utils/gameHelpers";
-import { logger } from "../../utils/logger";
-import type { Board } from "@shared/types/game.types";
+import { logger } from "../../logger";
+import type { Board } from "../../types/game.types";
 
 // Выполнение хода с обработкой захватов и превращения в дамку
 export const executeMove = (

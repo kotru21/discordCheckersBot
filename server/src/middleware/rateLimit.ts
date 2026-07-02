@@ -3,6 +3,16 @@ interface Bucket {
   resetAt: number;
 }
 
+const PRUNE_THRESHOLD = 1_000;
+
+function pruneExpiredBuckets(buckets: Map<string, Bucket>, now: number): void {
+  for (const [key, bucket] of buckets) {
+    if (now >= bucket.resetAt) {
+      buckets.delete(key);
+    }
+  }
+}
+
 export function createRateLimiter(maxRequests: number, windowMs: number) {
   const buckets = new Map<string, Bucket>();
 
@@ -11,6 +21,10 @@ export function createRateLimiter(maxRequests: number, windowMs: number) {
     const bucket = buckets.get(key);
 
     if (!bucket || now >= bucket.resetAt) {
+      buckets.delete(key);
+      if (buckets.size >= PRUNE_THRESHOLD) {
+        pruneExpiredBuckets(buckets, now);
+      }
       buckets.set(key, { count: 1, resetAt: now + windowMs });
       return false;
     }

@@ -1,8 +1,7 @@
 import { GAME_MODES } from "@shared/config/constants";
 import type { GameMode } from "../shared/types/game.types";
 
-export const isCrazyJumpsMode = (mode: GameMode): boolean =>
-  mode === GAME_MODES.CRAZY_JUMPS;
+export { isCrazyJumpsMode } from "@discord-checkers/game";
 
 export const getModeName = (mode: GameMode): string => {
   switch (mode) {

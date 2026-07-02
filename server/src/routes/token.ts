@@ -1,3 +1,5 @@
+import { logger } from "../logger";
+
 const DISCORD_TOKEN_URL = "https://discord.com/api/oauth2/token";
 const DISCORD_ACTIVITY_REDIRECT_URI = "https://127.0.0.1";
 
@@ -28,7 +30,10 @@ export async function exchangeCodeForToken(code: string): Promise<{ access_token
 
   if (!response.ok) {
     const text = await response.text();
-    console.error("Discord token exchange failed:", response.status, text);
+    logger.error("Discord token exchange failed", {
+      status: response.status,
+      body: text.slice(0, 200),
+    });
     throw new Error("Token exchange failed");
   }
 

@@ -1,11 +1,13 @@
 import {
   createInitialBoard,
   checkGameStatus,
-} from "../../../activity/src/services/BoardService";
-import { executeMove } from "../../../activity/src/services/move/executeMove";
-import { getValidMovesWithCapturePriority } from "../../../activity/src/services/move/capturePriority";
-import { pieceUtils } from "../../../activity/src/utils/gameHelpers";
-import type { Board, GameMode, Player } from "../../../activity/src/shared/types/game.types";
+  executeMove,
+  getValidMovesWithCapturePriority,
+  pieceUtils,
+  type Board,
+  type GameMode,
+  type Player,
+} from "@discord-checkers/game";
 
 export interface MoveInput {
   fromRow: number;
@@ -61,6 +63,39 @@ export class CheckersRoom {
     }
 
     throw new Error("Room is full");
+  }
+
+  leave(userId: string): RoomState {
+    if (this.state.players.beagle === userId) {
+      this.state.players.beagle = null;
+    } else if (this.state.players.corgi === userId) {
+      this.state.players.corgi = null;
+    }
+    return this.getState();
+  }
+
+  rematch(userId: string): RoomState {
+    if (!this.state.gameOver) {
+      throw new Error("Game is still in progress");
+    }
+
+    const { beagle, corgi } = this.state.players;
+    if (userId !== beagle && userId !== corgi) {
+      throw new Error("Not in this game");
+    }
+
+    const players = { beagle, corgi };
+    this.state = {
+      roomId: this.state.roomId,
+      board: createInitialBoard(),
+      activePlayer: "beagle",
+      players,
+      gameMode: PVP_GAME_MODE,
+      pendingChain: null,
+      gameOver: false,
+      winner: null,
+    };
+    return this.getState();
   }
 
   getState(): RoomState {

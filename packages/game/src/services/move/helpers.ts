@@ -5,9 +5,9 @@ import {
   PLAYER_KING,
   EMPTY,
   DIRECTIONS,
-} from "@shared/config/constants";
+} from "../../config/constants";
 import { boardUtils, validationUtils } from "../../utils/gameHelpers";
-import type { Board, Move } from "@shared/types/game.types";
+import type { Board, Move } from "../../types/game.types";
 
 export const isEnemyPiece = (
   piece: string | null,

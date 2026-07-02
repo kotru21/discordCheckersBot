@@ -4,6 +4,7 @@ import {
   useMemo,
   useEffect,
   type Dispatch,
+  type RefObject,
   type SetStateAction,
 } from "react";
 import type { PieceAnimationInfo } from "@shared/types/pieceAnimation.types";
@@ -23,6 +24,7 @@ import { isMyTurn, pieceUtils } from "../utils/gameHelpers";
 import { logger } from "../utils/logger";
 import { useTransientActionLock } from "./useTransientActionLock";
 import type { CaptureSquareRef } from "../game/squareVisualState";
+import { usePvpBoardSync, type PvpBoardSyncBridge } from "../multiplayer/usePvpBoardSync";
 
 /** Как `CaptureInfo` в Board3D: клетка + список захватов для подсветки. */
 type PieceCaptureHighlight = CaptureSquareRef & { captures: Move[] };
@@ -38,6 +40,8 @@ export interface UseGameBoardControllerArgs {
     toRow: number,
     toCol: number
   ) => void;
+  sendRematch?: () => void;
+  pvpBridgeRef?: RefObject<PvpBoardSyncBridge | null>;
 }
 
 export interface UseGameBoardControllerResult {
@@ -58,6 +62,8 @@ export interface UseGameBoardControllerResult {
   currentFps: number;
   showFpsInfo: boolean;
   setShowFpsInfo: Dispatch<SetStateAction<boolean>>;
+  playMode: "solo_bot" | "discord_pvp";
+  myPlayer: Player | null;
 }
 
 function canLocalPlayerMove(
@@ -101,6 +107,8 @@ function capturesForLocalPlayer(
 export function useGameBoardController({
   onReturnToMenu,
   sendMove,
+  sendRematch,
+  pvpBridgeRef,
 }: UseGameBoardControllerArgs): UseGameBoardControllerResult {
   const {
     board,
@@ -129,6 +137,18 @@ export function useGameBoardController({
   const [currentFps, setCurrentFps] = useState(60);
   const [currentAnimation, setCurrentAnimation] =
     useState<PieceAnimationInfo | null>(null);
+
+  const pvpSync = usePvpBoardSync(setCurrentAnimation);
+
+  useEffect(() => {
+    if (!pvpBridgeRef) {
+      return;
+    }
+    pvpBridgeRef.current = pvpSync;
+    return () => {
+      pvpBridgeRef.current = null;
+    };
+  }, [pvpBridgeRef, pvpSync]);
 
   const runNewGameLocked = useTransientActionLock(1000);
 
@@ -252,6 +272,14 @@ export function useGameBoardController({
             const fromCol = selectedPiece.col;
 
             if (playMode === "discord_pvp" && sendMove) {
+              const wasCapture = selectedMove.capturedRow !== undefined;
+              pvpSync.playLocalMove({
+                fromRow,
+                fromCol,
+                toRow: row,
+                toCol: col,
+                wasCapture,
+              });
               sendMove(fromRow, fromCol, row, col);
               resetSelection();
               return;
@@ -342,11 +370,16 @@ export function useGameBoardController({
       setValidMoves,
       startAnimation,
       sendMove,
+      pvpSync,
       gameMode,
     ]
   );
 
   const handleNewGame = useCallback(() => {
+    if (playMode === "discord_pvp") {
+      sendRematch?.();
+      return;
+    }
     runNewGameLocked(() => {
       try {
         setCurrentAnimation(null);
@@ -360,7 +393,7 @@ export function useGameBoardController({
         setGameMessage("Ошибка при создании новой игры.");
       }
     });
-  }, [runNewGameLocked, setGameMessage, setCurrentAnimation]);
+  }, [playMode, sendRematch, runNewGameLocked, setGameMessage, setCurrentAnimation]);
 
   const handleReturnToMenu = useCallback(() => {
     try {
@@ -389,5 +422,7 @@ export function useGameBoardController({
     currentFps,
     showFpsInfo,
     setShowFpsInfo,
+    playMode,
+    myPlayer,
   };
 }

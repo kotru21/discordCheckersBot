@@ -1,6 +1,6 @@
-import { EMPTY } from "@shared/config/constants";
-import { logger } from "../../utils/logger";
-import type { Board, Move } from "@shared/types/game.types";
+import { EMPTY } from "../../config/constants";
+import { logger } from "../../logger";
+import type { Board, Move } from "../../types/game.types";
 import {
   findKingCaptures,
   findRegularCaptures,

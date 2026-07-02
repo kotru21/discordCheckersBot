@@ -1,6 +1,6 @@
-import { EMPTY } from "@shared/config/constants";
+import { EMPTY } from "../../config/constants";
 import { boardUtils } from "../../utils/gameHelpers";
-import type { Board, Move } from "@shared/types/game.types";
+import type { Board, Move } from "../../types/game.types";
 import { getMoveDirections, getPieceInfo } from "./helpers";
 import { getAllPossibleCaptures } from "./captures";
 

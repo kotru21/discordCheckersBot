@@ -11,8 +11,13 @@ interface RoomEntry {
 export class RoomRegistry {
   private readonly rooms = new Map<string, RoomEntry>();
 
-  constructor() {
-    setInterval(() => this.sweep(), SWEEP_INTERVAL_MS).unref();
+  constructor(
+    private readonly roomTtlMs = ROOM_TTL_MS,
+    sweepIntervalMs = SWEEP_INTERVAL_MS
+  ) {
+    if (sweepIntervalMs > 0) {
+      setInterval(() => this.sweep(), sweepIntervalMs).unref();
+    }
   }
 
   get(instanceId: string): CheckersRoom {
@@ -34,8 +39,12 @@ export class RoomRegistry {
     }
   }
 
+  roomCount(): number {
+    return this.rooms.size;
+  }
+
   sweep(): void {
-    const cutoff = Date.now() - ROOM_TTL_MS;
+    const cutoff = Date.now() - this.roomTtlMs;
     for (const [instanceId, entry] of this.rooms) {
       if (entry.lastActiveAt < cutoff) {
         this.rooms.delete(instanceId);

@@ -1,7 +1,7 @@
-import { EMPTY, BOARD_SIZE } from "@shared/config/constants";
+import { EMPTY, BOARD_SIZE } from "../../config/constants";
 import { pieceUtils, boardUtils } from "../../utils/gameHelpers";
-import { logger } from "../../utils/logger";
-import type { Board, GameMode, Move } from "@shared/types/game.types";
+import { logger } from "../../logger";
+import type { Board, GameMode, Move } from "../../types/game.types";
 import { isCrazyJumpsMode } from "../../utils/modeHelpers";
 import { getAllPossibleCaptures } from "./captures";
 import { getValidMoves } from "./validMoves";
