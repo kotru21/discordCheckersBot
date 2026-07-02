@@ -11,9 +11,11 @@ RUN bun install --frozen-lockfile
 
 COPY server ./server
 COPY packages/game ./packages/game
+COPY bot ./bot
 
-WORKDIR /app/server
+COPY scripts/start-production.sh ./scripts/start-production.sh
+RUN chmod +x ./scripts/start-production.sh
 
 ENV NODE_ENV=production
 
-CMD ["bun", "start"]
+CMD ["./scripts/start-production.sh"]

@@ -212,7 +212,9 @@ After deploy, update `VITE_API_HOST` on Vercel to match the server’s public ho
 
 ### Bot (optional)
 
-Run `bot/` on any Node/Bun host with `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, and optionally `DISCORD_GUILD_ID`. Register commands with:
+The Heroku Docker image starts the bot alongside the API server (`scripts/start-production.sh`). Same env vars as the server: `DISCORD_TOKEN`, `DISCORD_CLIENT_ID`, optionally `DISCORD_GUILD_ID`.
+
+Register slash commands once (local or one-off):
 
 ```bash
 bun run --cwd bot register-commands
