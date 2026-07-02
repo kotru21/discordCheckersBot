@@ -18,11 +18,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-
-      - name: Deploy Docker container
-        uses: akhileshns/heroku-deploy@v3.14.15
         with:
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: discord-checkers-server
-          heroku_email: arsenijbaturo2000@gmail.com
-          usedocker: true
+          fetch-depth: 0
+
+      - name: Push to Heroku
+        env:
+          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
+        run: |
+          git remote add heroku "https://heroku:${HEROKU_API_KEY}@git.heroku.com/discord-checkers-server.git"
+          git push heroku HEAD:main
