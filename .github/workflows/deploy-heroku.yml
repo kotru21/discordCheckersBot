@@ -1,0 +1,28 @@
+name: Deploy Heroku
+
+on:
+  push:
+    branches: [main]
+
+concurrency:
+  group: deploy-heroku
+  cancel-in-progress: false
+
+jobs:
+  check:
+    uses: ./.github/workflows/ci.yml
+
+  deploy:
+    name: Deploy server to Heroku
+    needs: check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy Docker container
+        uses: akhileshns/heroku-deploy@v3.14.15
+        with:
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+          heroku_app_name: discord-checkers-server
+          heroku_email: arsenijbaturo2000@gmail.com
+          usedocker: true

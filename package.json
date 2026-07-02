@@ -8,7 +8,7 @@
     "dev:server": "bun run --cwd server dev",
     "dev:bot": "bun run --cwd bot dev",
     "build": "bun run --cwd activity build",
-    "test": "bun run --cwd activity test",
+    "test": "bun run --cwd activity test && bun test server/src",
     "lint": "eslint . --config eslint.config.ts",
     "lint:fix": "eslint . --config eslint.config.ts --fix",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
