@@ -3,6 +3,19 @@
   "installCommand": "cd .. && bun install",
   "buildCommand": "bun run build",
   "outputDirectory": "dist",
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
+        {
+          "key": "Content-Security-Policy",
+          "value": "frame-ancestors https://*.discord.com https://discord.com;"
+        }
+      ]
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/:path*",

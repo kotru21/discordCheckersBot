@@ -35,4 +35,12 @@ describe("CheckersRoom", () => {
     expect(state.activePlayer).toBe("corgi");
     expect(state.gameOver).toBe(false);
   });
+
+  test("rejects third player when room is full", () => {
+    const room = new CheckersRoom("room-3");
+    room.join("user-a");
+    room.join("user-b");
+
+    expect(() => room.join("user-c")).toThrow(/room is full/i);
+  });
 });

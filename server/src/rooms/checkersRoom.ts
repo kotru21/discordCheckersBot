@@ -44,15 +44,23 @@ export class CheckersRoom {
   }
 
   join(userId: string): RoomState {
-    if (!this.state.players.beagle) {
-      this.state.players.beagle = userId;
-    } else if (
-      !this.state.players.corgi &&
-      this.state.players.beagle !== userId
-    ) {
-      this.state.players.corgi = userId;
+    const { beagle, corgi } = this.state.players;
+
+    if (beagle === userId || corgi === userId) {
+      return this.getState();
     }
-    return this.getState();
+
+    if (!beagle) {
+      this.state.players.beagle = userId;
+      return this.getState();
+    }
+
+    if (!corgi && beagle !== userId) {
+      this.state.players.corgi = userId;
+      return this.getState();
+    }
+
+    throw new Error("Room is full");
   }
 
   getState(): RoomState {

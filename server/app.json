@@ -13,6 +13,10 @@
       "description": "Discord application Client Secret",
       "required": true
     },
+    "DISCORD_TOKEN": {
+      "description": "Discord bot token for Activity Instance API verification",
+      "required": true
+    },
     "SERVER_PUBLIC_HOST": {
       "description": "Public hostname without protocol, e.g. your-app.herokuapp.com",
       "required": false

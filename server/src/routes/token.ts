@@ -29,7 +29,7 @@ export async function exchangeCodeForToken(code: string): Promise<{ access_token
   if (!response.ok) {
     const text = await response.text();
     console.error("Discord token exchange failed:", response.status, text);
-    throw new Error(`Discord token exchange failed: ${response.status} ${text}`);
+    throw new Error("Token exchange failed");
   }
 
   return (await response.json()) as { access_token: string };

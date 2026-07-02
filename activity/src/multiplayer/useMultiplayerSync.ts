@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import type { DiscordSession } from "../discord/bootstrap";
+import { useDiscordWsAuth } from "../discord/discordWsAuthContext";
 import { resolvePlayerSideFromRoom } from "../discord/assignSides";
 import { useGameStore } from "../store/gameStore";
 import { connectGameSocket } from "./gameSocket";
@@ -30,6 +31,7 @@ function buildGameMessage(
 }
 
 export function useMultiplayerSync(session: DiscordSession | null) {
+  const wsAccessToken = useDiscordWsAuth();
   const playMode = useGameStore((s) => s.playMode);
   const setBoard = useGameStore((s) => s.setBoard);
   const setActivePlayer = useGameStore((s) => s.setActivePlayer);
@@ -42,12 +44,13 @@ export function useMultiplayerSync(session: DiscordSession | null) {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    if (playMode !== "discord_pvp" || !session) {
+    if (playMode !== "discord_pvp" || !session || !wsAccessToken) {
       return;
     }
 
     const socket = connectGameSocket(
       session.instanceId,
+      wsAccessToken,
       ({ payload }) => {
         const myPlayer = resolvePlayerSideFromRoom(
           payload.players,
@@ -75,18 +78,6 @@ export function useMultiplayerSync(session: DiscordSession | null) {
 
     socketRef.current = socket;
 
-    const sendJoin = () => {
-      socket.send(
-        JSON.stringify({ type: "join", userId: session.userId })
-      );
-    };
-
-    if (socket.readyState === WebSocket.OPEN) {
-      sendJoin();
-    } else {
-      socket.addEventListener("open", sendJoin, { once: true });
-    }
-
     return () => {
       socket.close();
       socketRef.current = null;
@@ -94,6 +85,7 @@ export function useMultiplayerSync(session: DiscordSession | null) {
   }, [
     playMode,
     session,
+    wsAccessToken,
     setBoard,
     setActivePlayer,
     setMyPlayer,
@@ -115,7 +107,6 @@ export function useMultiplayerSync(session: DiscordSession | null) {
       socket.send(
         JSON.stringify({
           type: "move",
-          userId: session.userId,
           move: { fromRow, fromCol, toRow, toCol },
         })
       );

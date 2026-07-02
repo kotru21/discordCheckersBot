@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import { useDiscordSession } from "./useDiscordSession";
 import { DiscordSessionContext } from "./discordSessionContext";
+import { DiscordWsAuthContext } from "./discordWsAuthContext";
 
 const inDiscord = new URLSearchParams(window.location.search).has("frame_id");
 
 function DiscordActivityShell({ children }: { children: ReactNode }) {
-  const { session, loading, error } = useDiscordSession();
+  const { session, wsAccessToken, loading, error } = useDiscordSession();
 
   if (loading) {
     return <div className="activity-loading">Connecting to Discord…</div>;
@@ -19,7 +20,9 @@ function DiscordActivityShell({ children }: { children: ReactNode }) {
 
   return (
     <DiscordSessionContext.Provider value={session}>
-      {children}
+      <DiscordWsAuthContext.Provider value={wsAccessToken}>
+        {children}
+      </DiscordWsAuthContext.Provider>
     </DiscordSessionContext.Provider>
   );
 }
@@ -28,7 +31,9 @@ export function ActivityShell({ children }: { children: ReactNode }) {
   if (!inDiscord) {
     return (
       <DiscordSessionContext.Provider value={null}>
-        {children}
+        <DiscordWsAuthContext.Provider value={null}>
+          {children}
+        </DiscordWsAuthContext.Provider>
       </DiscordSessionContext.Provider>
     );
   }

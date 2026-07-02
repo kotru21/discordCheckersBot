@@ -41,11 +41,15 @@ export const discordSdk = createSdk();
 export interface DiscordSession {
   userId: string;
   username: string;
-  accessToken: string;
   instanceId: string;
 }
 
-export async function bootstrapDiscordSession(): Promise<DiscordSession> {
+export interface BootstrapResult {
+  session: DiscordSession;
+  wsAccessToken: string;
+}
+
+export async function bootstrapDiscordSession(): Promise<BootstrapResult> {
   await discordSdk.ready();
 
   const apiHost = resolveApiHost();
@@ -81,9 +85,11 @@ export async function bootstrapDiscordSession(): Promise<DiscordSession> {
   const auth = await discordSdk.commands.authenticate({ access_token });
 
   return {
-    userId: auth.user.id,
-    username: auth.user.username,
-    accessToken: access_token,
-    instanceId: discordSdk.instanceId,
+    session: {
+      userId: auth.user.id,
+      username: auth.user.username,
+      instanceId: discordSdk.instanceId,
+    },
+    wsAccessToken: access_token,
   };
 }
